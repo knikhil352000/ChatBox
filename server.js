@@ -20,11 +20,16 @@ io.on('connection', (socket) => {
         const user = userJoin(socket.id, username, room)
         socket.join(user.room);
 
-        //Welcome current User
+        //Welcome current Use
         socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!')); 
 
         //Broadcast when a user connects
         socket.broadcast.to(user.room).emit('message', formatMessage(botName,`${user.username} has joined the chat`));
+        //Send User and room info
+        io.to(user.room).emit('roomUsers', {
+            room: user.room,
+            users: getRoomUsers(user.room)
+        })
     });
 
  
@@ -41,10 +46,11 @@ io.on('connection', (socket) => {
         if(user){
             io.to(user.room).emit('message', formatMessage(botName,`${user.username} has left the chat`));
         }
-
-        
+        io.to(user.room).emit('roomUsers', {
+            room: user.room,
+            users: getRoomUsers(user.room)
+        })
     });
- 
 });
 
 const PORT = 3000 || process.env.PORT;
